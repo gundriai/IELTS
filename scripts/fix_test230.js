@@ -28,8 +28,8 @@ const i_p3Q = mainContent.lastIndexOf('<p', mainContent.indexOf(p3Q));
 const i_answers = mainContent.indexOf(answersStart);
 
 if (i_p1Title === -1 || i_p1Q === -1 || i_p2Title === -1 || i_p2Q === -1 || i_p3Title === -1 || i_p3Q === -1 || i_answers === -1) {
-    console.error("Could not find all markers.");
-    process.exit(1);
+  console.error("Could not find all markers.");
+  process.exit(1);
 }
 
 const p1Text = mainContent.substring(i_p1Title, i_p1Q);
@@ -50,14 +50,14 @@ const answersHtml = mainContent.substring(i_answers);
 const inputBoxHTML = '<input type="text" class="inline-flex w-32 px-3 py-1.5 mx-2 bg-blue-50 border-2 border-blue-400 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 text-center font-bold transition-all hover:bg-blue-100" />';
 
 function injectInputs(html) {
-    // Fill in blanks
-    let out = html.replace(/\(\d{1,2}\)\s*(?:…{3,}|_{3,})/g, `$& ${inputBoxHTML}`);
-    // Standard numbered questions (e.g. "14. a mention of" or "<br>14. a mention of" or "<p>14. a mention of")
-    out = out.replace(/(<(?:br|p)[^>]*>)\s*(\d{1,2})\.\s+([A-Za-z])/g, `$1$2. ${inputBoxHTML} $3`);
-    // Specific block questions for test 230 that don't have standard numbering
-    out = out.replace(/(<strong>E<\/strong> They are made of less durable materials\.<\/p>)/, `$1<p style="text-align: justify;">23. ${inputBoxHTML} <br/> 24. ${inputBoxHTML}</p>`);
-    out = out.replace(/(<strong>E<\/strong> providing a suitable site for the installation of renewable power generators<\/p>)/, `$1<p style="text-align: justify;">25. ${inputBoxHTML} <br/> 26. ${inputBoxHTML}</p>`);
-    return out;
+  // Fill in blanks
+  let out = html.replace(/\(\d{1,2}\)\s*(?:…{3,}|_{3,})/g, `$& ${inputBoxHTML}`);
+  // Standard numbered questions (e.g. "14. a mention of" or "<br>14. a mention of" or "<p>14. a mention of")
+  out = out.replace(/(<(?:br|p)[^>]*>)\s*(\d{1,2})\.\s+([A-Za-z])/g, `$1$2. ${inputBoxHTML} $3`);
+  // Specific block questions for test 230 that don't have standard numbering
+  out = out.replace(/(<strong>E<\/strong> They are made of less durable materials\.<\/p>)/, `$1<p style="text-align: justify;">23. ${inputBoxHTML} <br/> 24. ${inputBoxHTML}</p>`);
+  out = out.replace(/(<strong>E<\/strong> providing a suitable site for the installation of renewable power generators<\/p>)/, `$1<p style="text-align: justify;">25. ${inputBoxHTML} <br/> 26. ${inputBoxHTML}</p>`);
+  return out;
 }
 
 q1Text = injectInputs(q1Text);
@@ -68,12 +68,12 @@ q3Text = injectInputs(q3Text);
 const ansMatch = answersHtml.match(/<div id='bg-showmore-hidden-[^>]+>\s*<\/p><p>(.*?)<\/p><\/div>/s);
 let rawAnswers = '';
 if (ansMatch) {
-    rawAnswers = ansMatch[1];
+  rawAnswers = ansMatch[1];
 } else {
-    // fallback
-    let divStart = answersHtml.indexOf("<div id='bg-showmore-hidden");
-    let divEnd = answersHtml.lastIndexOf('</div>');
-    rawAnswers = answersHtml.substring(divStart, divEnd);
+  // fallback
+  let divStart = answersHtml.indexOf("<div id='bg-showmore-hidden");
+  let divEnd = answersHtml.lastIndexOf('</div>');
+  rawAnswers = answersHtml.substring(divStart, divEnd);
 }
 // Strip the wrapper div if it's there
 rawAnswers = rawAnswers.replace(/<div id='bg-showmore-hidden[^>]+><\/p><p>/, '').replace(/<\/p><\/div>$/, '');
@@ -84,10 +84,10 @@ const ansLines = rawAnswers.split('<br>').map(s => s.trim()).filter(Boolean);
 let ansCol1 = [];
 let ansCol2 = [];
 ansLines.forEach((line, i) => {
-    // Strip <p> tags
-    line = line.replace(/<\/?p>/g, '').trim();
-    if (i < 20) ansCol1.push(line);
-    else ansCol2.push(line);
+  // Strip <p> tags
+  line = line.replace(/<\/?p>/g, '').trim();
+  if (i < 20) ansCol1.push(line);
+  else ansCol2.push(line);
 });
 
 const pageContent = `"use client";
@@ -121,7 +121,7 @@ export default function IELTSReadingTest230() {
           <Link href="/" className="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm">
             <ArrowLeft className="h-5 w-5 text-slate-700" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-tight">IELTS Reading Test 230</h1>
+          <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-tight">IELTS Reading Test 17.1</h1>
         </div>
         <div className="flex items-center bg-slate-100/80 px-4 py-2 rounded-xl border border-slate-200 shadow-inner">
           <Clock className="w-5 h-5 text-slate-500 mr-3" />
