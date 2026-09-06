@@ -29,7 +29,7 @@ export default function IELTSReadingTest230() {
           <Link href="/" className="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm">
             <ArrowLeft className="h-5 w-5 text-slate-700" />
           </Link>
-          <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-tight">IELTS Reading Test 230</h1>
+          <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-tight">17.1 IELTS Reading Test 230</h1>
         </div>
         <div className="flex items-center bg-slate-100/80 px-4 py-2 rounded-xl border border-slate-200 shadow-inner">
           <Clock className="w-5 h-5 text-slate-500 mr-3" />
