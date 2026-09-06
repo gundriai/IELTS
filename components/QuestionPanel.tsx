@@ -13,6 +13,7 @@ interface QuestionPanelProps {
   userAnswers: Record<string, string>;
   onAnswerChange: (questionId: string, answer: string) => void;
   onSubmit: () => void;
+  activePassageId?: string;
 }
 
 export default function QuestionPanel({ questions, userAnswers, onAnswerChange, onSubmit, activePassageId }: QuestionPanelProps) {
