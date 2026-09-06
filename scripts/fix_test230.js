@@ -47,7 +47,7 @@ q3Text = q3Text.replace(/<p><br><ins style="display: block;"[^>]+><\/ins><\/p>/,
 
 const answersHtml = mainContent.substring(i_answers);
 
-const inputBoxHTML = '<input type="text" className="inline-flex w-32 px-3 py-1.5 mx-2 bg-blue-50 border-2 border-blue-400 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 text-center font-bold transition-all hover:bg-blue-100" />';
+const inputBoxHTML = '<input type="text" class="inline-flex w-32 px-3 py-1.5 mx-2 bg-blue-50 border-2 border-blue-400 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 text-center font-bold transition-all hover:bg-blue-100" />';
 
 function injectInputs(html) {
     // Fill in blanks

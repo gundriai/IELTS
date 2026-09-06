@@ -93,8 +93,8 @@ In IELTS Reading, there are various types of questions. You must inject an input
 
 **A. Fill in the Blanks**
 Whenever you see a blank space intended for user input, such as `(1) …………………` or `(1) _______`, replace the dotted/underscore line with an HTML input element:
-```tsx
-<input type="text" className="inline-flex w-32 px-3 py-1.5 mx-2 bg-blue-50 border-2 border-blue-400 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 text-center font-bold transition-all hover:bg-blue-100" />
+```html
+<input type="text" class="inline-flex w-32 px-3 py-1.5 mx-2 bg-blue-50 border-2 border-blue-400 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 text-center font-bold transition-all hover:bg-blue-100" />
 ```
 Keep the numbering (e.g., "(1)") intact next to the input box.
 
