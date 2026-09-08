@@ -1,13 +1,140 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock } from 'lucide-react';
+import { ArrowLeft, Clock, Highlighter, Trash2 } from 'lucide-react';
 
 export default function IELTSReadingTest18_2() {
   const [showAnswers, setShowAnswers] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60 * 60);
   const [activeTab, setActiveTab] = useState(0);
+  const [highlightCount, setHighlightCount] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<string[]>([]);
+  const passageRef = useRef<HTMLDivElement>(null);
+  const questionsRef = useRef<HTMLDivElement>(null);
+
+  const correctAnswers: Record<number, string> = {
+    1: '(deer) antlers',
+    2: '(timber) posts',
+    3: 'Tree trunk',
+    4: 'Oxen',
+    5: 'Glaciers',
+    6: 'Druids',
+    7: 'Burial',
+    8: 'Calendar',
+    9: 'True',
+    10: 'False',
+    11: 'False',
+    12: 'True',
+    13: 'Not given',
+    14: 'C',
+    15: 'A',
+    16: 'B',
+    17: 'D',
+    18: 'C',
+    19: 'D',
+    20: 'Yes',
+    21: 'Not given',
+    22: 'No',
+    23: 'Yes',
+    24: 'C',
+    25: 'A',
+    26: 'E',
+    27: 'Not given',
+    28: 'Not given',
+    29: 'True',
+    30: 'False',
+    31: 'True',
+    32: 'Not given',
+    33: 'False',
+    34: 'Transport',
+    35: 'Staircases',
+    36: 'Engineering',
+    37: 'Rule',
+    38: 'Roman',
+    39: 'Paris',
+    40: 'Outwards',
+  };
+
+  const collectUserAnswers = useCallback(() => {
+    if (!questionsRef.current) return;
+    const inputs = questionsRef.current.querySelectorAll('input[type="text"]:not([type="hidden"])');
+    const ans: string[] = [];
+    inputs.forEach((input) => {
+      ans.push((input as HTMLInputElement).value.trim());
+    });
+    setUserAnswers(ans);
+  }, []);
+
+  const isAnswerCorrect = (userAns: string, correctAns: string) => {
+    if (!userAns) return false;
+    const c = correctAns.toLowerCase();
+    const u = userAns.toLowerCase();
+    if (c.includes(' or ') || c.includes('/ ') || c.includes(', ')) {
+      const sep = c.includes(' or ') ? ' or ' : c.includes('/ ') ? '/ ' : ', ';
+      return c.split(sep).map(o => o.trim()).includes(u);
+    }
+    if (c.includes('(')) {
+      const w = c.replace(/\([^)]+\)\s*/g, '').trim();
+      const wp = c.replace(/[()]/g, '').trim();
+      return u === w || u === wp || u === c;
+    }
+    return u === c;
+  };
+
+  const updateHighlightCount = useCallback(() => {
+    if (passageRef.current) {
+      setHighlightCount(passageRef.current.querySelectorAll('mark.user-highlight').length);
+    }
+  }, []);
+
+  const handleHighlight = useCallback(() => {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    if (!passageRef.current?.contains(range.commonAncestorContainer)) return;
+    const anchorEl = selection.anchorNode?.parentElement;
+    const focusEl = selection.focusNode?.parentElement;
+    if (anchorEl?.tagName === 'INPUT' || focusEl?.tagName === 'INPUT') return;
+    const mark = document.createElement('mark');
+    mark.className = 'user-highlight';
+    mark.style.backgroundColor = '#fef08a';
+    mark.style.borderRadius = '2px';
+    mark.style.padding = '1px 0';
+    mark.style.cursor = 'pointer';
+    mark.style.transition = 'background-color 0.2s ease';
+    mark.title = 'Click to remove highlight';
+    mark.addEventListener('click', () => {
+      const parent = mark.parentNode;
+      if (parent) {
+        while (mark.firstChild) { parent.insertBefore(mark.firstChild, mark); }
+        parent.removeChild(mark);
+        parent.normalize();
+        updateHighlightCount();
+      }
+    });
+    try { range.surroundContents(mark); } catch {
+      const fragment = range.extractContents();
+      mark.appendChild(fragment);
+      range.insertNode(mark);
+    }
+    selection.removeAllRanges();
+    updateHighlightCount();
+  }, [updateHighlightCount]);
+
+  const clearAllHighlights = useCallback(() => {
+    if (!passageRef.current) return;
+    const marks = passageRef.current.querySelectorAll('mark.user-highlight');
+    marks.forEach((m) => {
+      const parent = m.parentNode;
+      if (parent) {
+        while (m.firstChild) { parent.insertBefore(m.firstChild, m); }
+        parent.removeChild(m);
+        parent.normalize();
+      }
+    });
+    setHighlightCount(0);
+  }, []);
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -33,9 +160,25 @@ export default function IELTSReadingTest18_2() {
           </Link>
           <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-tight">Reading 18.2</h1>
         </div>
-        <div className="flex items-center bg-slate-100/80 px-4 py-2 rounded-xl border border-slate-200 shadow-inner">
-          <Clock className="w-5 h-5 text-slate-500 mr-3" />
-          <span className="font-mono text-xl font-bold text-slate-700">{formatTime(timeLeft)}</span>
+<div className="flex items-center gap-3">
+          {highlightCount > 0 && (
+            <button
+              onClick={clearAllHighlights}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100 hover:border-amber-300 transition-all text-sm font-semibold shadow-sm"
+              title="Clear all highlights"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear All ({highlightCount})
+            </button>
+          )}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50/60 border border-amber-200/50 text-amber-600 text-sm font-medium">
+            <Highlighter className="w-4 h-4" />
+            <span>Select text to highlight</span>
+          </div>
+          <div className="flex items-center bg-slate-100/80 px-4 py-2 rounded-xl border border-slate-200 shadow-inner">
+            <Clock className="w-5 h-5 text-slate-500 mr-3" />
+            <span className="font-mono text-xl font-bold text-slate-700">{formatTime(timeLeft)}</span>
+          </div>
         </div>
       </header>
 
@@ -43,9 +186,8 @@ export default function IELTSReadingTest18_2() {
       <main className="flex flex-1 overflow-hidden relative p-6 gap-6">
         {/* Left Pane: Questions */}
         <section className="w-1/2 relative z-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-y-auto scroll-smooth flex flex-col">
-          <div className="p-10 prose prose-slate prose-p:mb-6 prose-headings:text-slate-800 prose-p:text-slate-700 max-w-none flex-1">
-            {activeTab === 0 && (
-              <div
+          <div ref={questionsRef} className="p-10 prose prose-slate prose-p:mb-6 prose-headings:text-slate-800 prose-p:text-slate-700 max-w-none flex-1">
+            <div style={{ display: activeTab === 0 ? 'block' : 'none' }}
                 dangerouslySetInnerHTML={{
                   __html: `
 <p style="text-align: justify;"><strong>Questions 1-8</strong><br />Complete the notes below. Choose <strong>NO MORE THAN TWO WORDS</strong> from the passage for each answer. Write your answers in boxes 1-8 on your answer sheet.</p>
@@ -92,10 +234,8 @@ export default function IELTSReadingTest18_2() {
 `
                 }}
               />
-            )}
 
-            {activeTab === 1 && (
-              <div
+            <div style={{ display: activeTab === 1 ? 'block' : 'none' }}
                 dangerouslySetInnerHTML={{
                   __html: `
 <p style="text-align: justify;"><strong>Questions 14-19</strong><br />Choose the correct letter, <strong>A, B, C or D</strong>.</p>
@@ -178,10 +318,8 @@ export default function IELTSReadingTest18_2() {
 `
                 }}
               />
-            )}
 
-            {activeTab === 2 && (
-              <div
+            <div style={{ display: activeTab === 2 ? 'block' : 'none' }}
                 dangerouslySetInnerHTML={{
                   __html: `
 <p style="text-align: justify;"><strong>Questions 27-33</strong><br />Do the following statements agree with the information given in reading passage? In boxes 27-33 on your answer sheet, write</p>
@@ -210,67 +348,88 @@ export default function IELTSReadingTest18_2() {
 `
                 }}
               />
-            )}
 
             <div className="mt-12 border-t border-slate-100 pt-8 pb-8">
               <button 
-                onClick={() => setShowAnswers(!showAnswers)}
+                onClick={() => {
+                  if (!showAnswers) collectUserAnswers();
+                  setShowAnswers(!showAnswers);
+                }}
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 px-8 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center w-full sm:w-auto"
               >
                 {showAnswers ? 'Hide Answers' : 'Show Answers'}
               </button>
               
               {showAnswers && (
-                <div className="mt-6 p-6 bg-white rounded-xl shadow-sm border border-slate-200">
-                  <h3 className="font-bold text-lg mb-4 text-slate-800">Answers</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm text-slate-700">
-                    <div>
-                      <p>
-                        1. (deer) antlers<br />
-                        2. (timber) posts<br />
-                        3. Tree trunk<br />
-                        4. Oxen<br />
-                        5. Glaciers<br />
-                        6. Druids<br />
-                        7. Burial<br />
-                        8. Calendar<br />
-                        9. True<br />
-                        10. False<br />
-                        11. False<br />
-                        12. True<br />
-                        13. Not given<br />
-                        14. C<br />
-                        15. A<br />
-                        16. B<br />
-                        17. D<br />
-                        18. C<br />
-                        19. D<br />
-                        20. Yes
-                      </p>
+                <div className="mt-6 space-y-6">
+                  {/* Your Answers vs Correct Answers */}
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-200">
+                    <h3 className="font-bold text-lg mb-4 text-blue-800 flex items-center gap-2">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold">✎</span>
+                      Your Answers
+                    </h3>
+                    <div className="overflow-hidden rounded-lg border border-blue-200">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-blue-100">
+                            <th className="py-2.5 px-4 text-left font-bold text-blue-900 w-16">#</th>
+                            <th className="py-2.5 px-4 text-left font-bold text-blue-900">Your Answer</th>
+                            <th className="py-2.5 px-4 text-left font-bold text-blue-900">Correct Answer</th>
+                            <th className="py-2.5 px-4 text-center font-bold text-blue-900 w-16">✓/✗</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Array.from({ length: 40 }, (_, i) => {
+                            const qNum = i + 1;
+                            const userAns = userAnswers[i] || '';
+                            const correctAns = correctAnswers[qNum] || '';
+                            const correct = isAnswerCorrect(userAns, correctAns);
+                            const answered = userAns.length > 0;
+                            return (
+                              <tr key={qNum} className={`border-t border-blue-100 ${i % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'}`}>
+                                <td className="py-2 px-4 font-bold text-slate-600">{qNum}</td>
+                                <td className={`py-2 px-4 font-semibold ${
+                                  !answered ? 'text-slate-400 italic' : correct ? 'text-emerald-700' : 'text-red-600'
+                                }`}>
+                                  {answered ? userAns : '—'}
+                                </td>
+                                <td className="py-2 px-4 font-semibold text-slate-700">{correctAns}</td>
+                                <td className="py-2 px-4 text-center text-lg">
+                                  {!answered ? (
+                                    <span className="text-slate-300">—</span>
+                                  ) : correct ? (
+                                    <span className="text-emerald-500">✓</span>
+                                  ) : (
+                                    <span className="text-red-500">✗</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                    <div>
-                      <p>
-                        21. Not given<br />
-                        22. No<br />
-                        23. Yes<br />
-                        24. C<br />
-                        25. A<br />
-                        26. E<br />
-                        27. Not given<br />
-                        28. Not given<br />
-                        29. True<br />
-                        30. False<br />
-                        31. True<br />
-                        32. Not given<br />
-                        33. False<br />
-                        34. Transport<br />
-                        35. Staircases<br />
-                        36. Engineering<br />
-                        37. Rule<br />
-                        38. Roman<br />
-                        39. Paris<br />
-                        40. Outwards
-                      </p>
+                    <div className="mt-4 flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg font-semibold">
+                        <span>✓</span>
+                        <span>{userAnswers.filter((ans, i) => ans && isAnswerCorrect(ans, correctAnswers[i + 1] || '')).length} / 40 Correct</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-lg font-semibold">
+                        <span>✗</span>
+                        <span>{userAnswers.filter((ans, i) => ans && !isAnswerCorrect(ans, correctAnswers[i + 1] || '')).length} Wrong</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-500 rounded-lg font-semibold">
+                        <span>—</span>
+                        <span>{40 - userAnswers.filter(a => a).length} Unanswered</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Answer Key */}
+                  <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
+                    <h3 className="font-bold text-lg mb-4 text-slate-800">Answer Key</h3>
+                    <div className="text-sm text-slate-700">
+                      <p>1. (deer) antlers<br />2. (timber) posts<br />3. Tree trunk<br />4. Oxen<br />5. Glaciers<br />6. Druids<br />7. Burial<br />8. Calendar<br />9. True<br />10. False<br />11. False<br />12. True<br />13. Not given<br />14. C<br />15. A<br />16. B<br />17. D<br />18. C<br />19. D<br />20. Yes<br />21. Not given<br />22. No<br />23. Yes<br />24. C<br />25. A<br />26. E<br />27. Not given<br />28. Not given<br />29. True<br />30. False<br />31. True<br />32. Not given<br />33. False<br />34. Transport<br />35. Staircases<br />36. Engineering<br />37. Rule<br />38. Roman<br />39. Paris<br />40. Outwards</p>
                     </div>
                   </div>
                 </div>
@@ -299,9 +458,8 @@ export default function IELTSReadingTest18_2() {
           </div>
           
           {/* Tab Content */}
-          <div className="p-10 prose prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:mb-6 prose-strong:text-slate-700 max-w-none overflow-y-auto scroll-smooth flex-1">
-            {activeTab === 0 && (
-              <div
+          <div ref={passageRef} onMouseUp={handleHighlight} className="p-10 prose prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:mb-6 prose-strong:text-slate-700 max-w-none overflow-y-auto scroll-smooth flex-1 selection:bg-amber-200/50">
+            <div style={{ display: activeTab === 0 ? 'block' : 'none' }}
                 dangerouslySetInnerHTML={{
                   __html: `
 <p style="text-align: center;"><strong>Stonehenge</strong></p>
@@ -319,10 +477,8 @@ export default function IELTSReadingTest18_2() {
 `
                 }}
               />
-            )}
 
-            {activeTab === 1 && (
-              <div
+            <div style={{ display: activeTab === 1 ? 'block' : 'none' }}
                 dangerouslySetInnerHTML={{
                   __html: `
 <p style="text-align: center;"><strong>Living with artificial intelligence</strong></p>
@@ -339,10 +495,8 @@ export default function IELTSReadingTest18_2() {
 `
                 }}
               />
-            )}
 
-            {activeTab === 2 && (
-              <div
+            <div style={{ display: activeTab === 2 ? 'block' : 'none' }}
                 dangerouslySetInnerHTML={{
                   __html: `
 <p style="text-align: center;"><strong>An ideal city</strong></p>
@@ -359,7 +513,6 @@ export default function IELTSReadingTest18_2() {
 `
                 }}
               />
-            )}
           </div>
         </section>
       </main>

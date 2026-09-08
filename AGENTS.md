@@ -10,6 +10,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Agent Instructions for Adding New IELTS Tests
 
+> **📄 REFERENCE FILE:** Use `app/test/18.1/reading/page.tsx` as the canonical template for all new reading tests. Read it before writing any code. It contains the complete, working implementation of every feature described below.
+
 When the user asks you to add a new IELTS test and provides the raw HTML, follow these instructions strictly:
 
 ## 1. Directory Structure
@@ -17,77 +19,93 @@ Create a new folder for the test ID provided by the user under `app/test/`. Insi
 Example for Test 231 Reading: `app/test/231/reading/page.tsx`
 
 ## 2. Layout Structure
-The page must be a static React component (`page.tsx`) with a split-screen layout:
-- **Left Side (1/2 width):** All Questions and the "Show Answers" button/section.
+The page must be a `"use client"` React component (`page.tsx`) with a split-screen layout:
+- **Left Side (1/2 width):** All Questions (synced with active tab) and the "Show Answers" button/section.
 - **Right Side (1/2 width):** All Reading Passages separated into 3 Tabs.
 
-Use Tailwind CSS for styling to make it look premium. Add state for the timer and tabs, and use a layout like this:
+### Required Imports
 ```tsx
-  const [showAnswers, setShowAnswers] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60 * 60);
-  const [activeTab, setActiveTab] = useState(0);
-
-  // ... timer useEffect logic ...
-
-  return (
-    <div className="flex h-screen flex-col overflow-hidden bg-slate-50">
-      <header className="flex h-16 items-center justify-between border-b border-slate-200/60 bg-white/80 backdrop-blur-md px-8 shadow-sm z-20">
-        <div className="flex items-center">
-           <Link href="/" className="mr-4 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm">
-              <ArrowLeft className="h-5 w-5 text-slate-700" />
-           </Link>
-           <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-tight">IELTS Reading Test [ID]</h1>
-        </div>
-        {/* Timer UI here */}
-      </header>
-      <main className="flex flex-1 overflow-hidden relative p-6 gap-6">
-        <section className="w-1/2 relative z-0 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-y-auto scroll-smooth">
-          <div className="p-10 prose prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:mb-6 max-w-none">
-            {activeTab === 0 && <div dangerouslySetInnerHTML={{ __html: questions1HTML }} />}
-            {activeTab === 1 && <div dangerouslySetInnerHTML={{ __html: questions2HTML }} />}
-            {activeTab === 2 && <div dangerouslySetInnerHTML={{ __html: questions3HTML }} />}
-            {/* Show answers button and answers block */}
-          </div>
-        </section>
-        <section className="w-1/2 relative z-10 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col overflow-hidden">
-          {/* Tabs Header */}
-          <div className="flex border-b border-slate-200 bg-slate-50/80 px-4 pt-4 gap-2">
-            {[1, 2, 3].map((tabNum, idx) => (
-              <button
-                key={tabNum}
-                onClick={() => setActiveTab(idx)}
-                className={\`px-6 py-3 rounded-t-lg font-bold text-sm transition-colors border-x border-t \${
-                  activeTab === idx 
-                    ? 'bg-white border-slate-200 text-blue-700 shadow-sm relative top-[1px]' 
-                    : 'bg-transparent border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100'
-                }\`}
-              >
-                Passage {tabNum}
-              </button>
-            ))}
-          </div>
-          
-          {/* Tab Content */}
-          <div className="p-10 prose prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-p:mb-6 prose-strong:text-slate-700 max-w-none overflow-y-auto scroll-smooth flex-1">
-            {activeTab === 0 && <div dangerouslySetInnerHTML={{ __html: passage1HTML }} />}
-            {activeTab === 1 && <div dangerouslySetInnerHTML={{ __html: passage2HTML }} />}
-            {activeTab === 2 && <div dangerouslySetInnerHTML={{ __html: passage3HTML }} />}
-          </div>
-        </section>
-      </main>
-    </div>
-  );
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Clock, Highlighter, Trash2 } from 'lucide-react';
 ```
-Ensure both sides are scrollable independently. Use gradient buttons for the answers toggle.
 
-## 3. Parsing the HTML
+### Required State & Refs
+```tsx
+const [showAnswers, setShowAnswers] = useState(false);
+const [timeLeft, setTimeLeft] = useState(60 * 60);
+const [activeTab, setActiveTab] = useState(0);
+const [highlightCount, setHighlightCount] = useState(0);
+const [userAnswers, setUserAnswers] = useState<string[]>([]);
+const passageRef = useRef<HTMLDivElement>(null);
+const questionsRef = useRef<HTMLDivElement>(null);
+```
+
+### Required Data
+```tsx
+const correctAnswers: Record<number, string> = {
+  1: 'Answer1', 2: 'Answer2', /* ... up to 40 */
+};
+```
+
+### Required Functions
+Copy these functions exactly from `app/test/18.1/reading/page.tsx`:
+- `collectUserAnswers()` — reads all input values from the DOM via `questionsRef`
+- `isAnswerCorrect(userAns, correctAns)` — case-insensitive comparison, handles "X or Y", "X/ Y", "X, Y" alternatives, and parenthetical optional words like "(food) consumption"
+- `updateHighlightCount()` — counts `mark.user-highlight` elements in passage
+- `handleHighlight()` — wraps selected text in `<mark>` tags, click-to-remove
+- `clearAllHighlights()` — removes all highlights from passages
+
+## 3. Tab Rendering — CSS Display Toggle (CRITICAL)
+**DO NOT** use conditional rendering (`{activeTab === 0 && <div ... />}`) for tab content. This unmounts the DOM and **destroys all user-typed answers** when switching tabs.
+
+**INSTEAD**, use CSS display toggling to keep all tabs mounted:
+```tsx
+{/* ✅ CORRECT — preserves input state */}
+<div style={{ display: activeTab === 0 ? 'block' : 'none' }}
+  dangerouslySetInnerHTML={{ __html: questions1HTML }}
+/>
+
+{/* ❌ WRONG — destroys input values on tab switch */}
+{activeTab === 0 && <div dangerouslySetInnerHTML={{ __html: questions1HTML }} />}
+```
+
+Apply this to **all 6 tab divs** (3 question tabs + 3 passage tabs).
+
+## 4. Header — Highlight Controls + Timer
+The header must include:
+1. A **"Clear All (N)"** button (visible only when `highlightCount > 0`)
+2. A **"Select text to highlight"** hint with `Highlighter` icon
+3. The **countdown timer** with `Clock` icon
+
+See `app/test/18.1/reading/page.tsx` header section for exact implementation.
+
+## 5. Passage Highlighting
+The passage container (right side) must have:
+```tsx
+<div ref={passageRef} onMouseUp={handleHighlight}
+  className="... selection:bg-amber-200/50">
+```
+This enables:
+- Selecting text in passages wraps it in a yellow `<mark>` tag
+- Clicking a highlight removes it
+- "Clear All" button in the header removes all highlights at once
+
+## 6. Questions Container Ref
+The questions container (left side) must have:
+```tsx
+<div ref={questionsRef} className="...">
+```
+This is used by `collectUserAnswers()` to read all input values when "Show Answers" is clicked.
+
+## 7. Parsing the HTML
 The provided HTML usually interleaves Passages and Questions (e.g., Passage 1 -> Questions 1-13 -> Passage 2...). 
 You must separate them:
 - **Passages:** Extract the text that forms the reading content. Split the passages logically (e.g., by "Reading Passage 1", "Reading Passage 2") and render them into the 3 Tabs on the Right Side.
 - **Questions:** Extract the questions and split them up logically to correspond with their respective passage. Render them in the Left Side container conditionally based on the active tab.
-- **Answers:** Extract the answers block at the bottom and place it inside a conditionally rendered or toggleable section on the Left Side.
+- **Answers:** Extract the answer key and populate the `correctAnswers` object (1-40).
 
-## 4. Input Boxes for User Answers
+## 8. Input Boxes for User Answers
 You CANNOT erase any part of the questions text.
 In IELTS Reading, there are various types of questions. You must inject an input box for *every* numbered question, following these rules:
 
@@ -109,8 +127,33 @@ Example:
 <p>23. [INPUT] <br> 24. [INPUT]</p>
 ```
 
-## 5. Do Not Complicate the Logic
-Do NOT build complex state management to grade the answers automatically unless requested. The user simply wants to be able to type their answers into the text boxes while reading the passage on the right. At the bottom of the questions side, provide a button to reveal the correct answers (which were provided in the HTML) so the user can self-grade.
+## 9. "Show Answers" — Your Answers Comparison Table
+The "Show Answers" button must:
+1. **Collect user answers** from all 40 input fields via `collectUserAnswers()` when clicked
+2. Display a **"Your Answers" comparison table** with columns: `#`, `Your Answer`, `Correct Answer`, `✓/✗`
+3. Show a **score summary**: `✓ X/40 Correct` | `✗ Y Wrong` | `— Z Unanswered`
+4. Below it, show the plain **"Answer Key"** list for reference
 
-## 6. Update the Dashboard
+```tsx
+onClick={() => {
+  if (!showAnswers) collectUserAnswers();
+  setShowAnswers(!showAnswers);
+}}
+```
+
+See `app/test/18.1/reading/page.tsx` for the full comparison table JSX (search for `"Your Answers"`).
+
+## 10. Update the Dashboard
 After adding the new test page, update `app/page.tsx` to include a simple HTML link to the new test.
+
+## Quick Checklist
+Before marking a test page as done, verify:
+- [ ] Imports include `useRef`, `useCallback`, `Highlighter`, `Trash2`
+- [ ] All 6 tab divs use `style={{ display: ... }}` NOT conditional `&&` rendering
+- [ ] `questionsRef` is attached to the questions container div
+- [ ] `passageRef` + `onMouseUp={handleHighlight}` is on the passage container div
+- [ ] `correctAnswers` object has all 40 answers
+- [ ] "Show Answers" calls `collectUserAnswers()` before revealing
+- [ ] Comparison table + score summary is present
+- [ ] Highlight controls (Clear All + hint) are in the header
+- [ ] `app/page.tsx` has a link to the new test
