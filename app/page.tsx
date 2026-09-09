@@ -54,6 +54,13 @@ export default function Dashboard() {
                 Start Test <span className="ml-2">→</span>
               </div>
             </Link>
+            <Link href="/test/17.2/reading" className="block rounded-2xl bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">IELTS Reading Test 17.2</h3>
+              <p className="text-sm text-slate-500">Practice your reading skills with this complete test.</p>
+              <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm">
+                Start Test <span className="ml-2">→</span>
+              </div>
+            </Link>
           </div>
         </section>
       </div>
