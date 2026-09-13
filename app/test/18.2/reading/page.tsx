@@ -16,7 +16,7 @@ export default function IELTSReadingTest18_2() {
   const correctAnswers: Record<number, string> = {
     1: '(deer) antlers',
     2: '(timber) posts',
-    3: 'Tree trunk',
+    3: 'Tree trunks',
     4: 'Oxen',
     5: 'Glaciers',
     6: 'Druids',
@@ -429,7 +429,7 @@ export default function IELTSReadingTest18_2() {
                   <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
                     <h3 className="font-bold text-lg mb-4 text-slate-800">Answer Key</h3>
                     <div className="text-sm text-slate-700">
-                      <p>1. (deer) antlers<br />2. (timber) posts<br />3. Tree trunk<br />4. Oxen<br />5. Glaciers<br />6. Druids<br />7. Burial<br />8. Calendar<br />9. True<br />10. False<br />11. False<br />12. True<br />13. Not given<br />14. C<br />15. A<br />16. B<br />17. D<br />18. C<br />19. D<br />20. Yes<br />21. Not given<br />22. No<br />23. Yes<br />24. C<br />25. A<br />26. E<br />27. Not given<br />28. Not given<br />29. True<br />30. False<br />31. True<br />32. Not given<br />33. False<br />34. Transport<br />35. Staircases<br />36. Engineering<br />37. Rule<br />38. Roman<br />39. Paris<br />40. Outwards</p>
+                      <p>1. (deer) antlers<br />2. (timber) posts<br />3. Tree trunks<br />4. Oxen<br />5. Glaciers<br />6. Druids<br />7. Burial<br />8. Calendar<br />9. True<br />10. False<br />11. False<br />12. True<br />13. Not given<br />14. C<br />15. A<br />16. B<br />17. D<br />18. C<br />19. D<br />20. Yes<br />21. Not given<br />22. No<br />23. Yes<br />24. C<br />25. A<br />26. E<br />27. Not given<br />28. Not given<br />29. True<br />30. False<br />31. True<br />32. Not given<br />33. False<br />34. Transport<br />35. Staircases<br />36. Engineering<br />37. Rule<br />38. Roman<br />39. Paris<br />40. Outwards</p>
                     </div>
                   </div>
                 </div>

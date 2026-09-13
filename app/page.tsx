@@ -63,6 +63,27 @@ export default function Dashboard() {
             </Link>
           </div>
         </section>
+
+        {/* Books Section */}
+        <section className="mt-12">
+          <h2 className="mb-6 text-2xl font-bold text-slate-800">Books</h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <a href="https://www.ketabane.org/file/attach/blog_uploads/2023/07/Cambridge-IELTS-18-Academic.pdf" target="_blank" rel="noopener noreferrer" className="block rounded-2xl bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Cambridge IELTS 18</h3>
+              <p className="text-sm text-slate-500">Download or view the Cambridge IELTS 18 Academic PDF.</p>
+              <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm">
+                View Book <span className="ml-2">→</span>
+              </div>
+            </a>
+            <a href="https://ia601501.us.archive.org/2/items/cambridge-17/Cambridge%2017_text.pdf" target="_blank" rel="noopener noreferrer" className="block rounded-2xl bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-bold text-slate-900 mb-2">Cambridge IELTS 17</h3>
+              <p className="text-sm text-slate-500">Download or view the Cambridge IELTS 17 Academic PDF.</p>
+              <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm">
+                View Book <span className="ml-2">→</span>
+              </div>
+            </a>
+          </div>
+        </section>
       </div>
     </div>
   );
