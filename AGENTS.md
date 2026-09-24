@@ -157,3 +157,16 @@ Before marking a test page as done, verify:
 - [ ] Comparison table + score summary is present
 - [ ] Highlight controls (Clear All + hint) are in the header
 - [ ] `app/page.tsx` has a link to the new test
+
+# Agent Instructions for Adding New IELTS Writing Tests
+
+> **📄 REFERENCE FILE:** Use `app/test/17.1/writing/page.tsx` as the canonical template for all new writing tests. 
+
+When creating a new writing test:
+1. **Directory Structure**: Create the folder for the test ID under `app/test/` (e.g., `17.4/writing/page.tsx`).
+2. **Layout Structure**: Use the resizable split-screen layout with a vertical drag handle separating the Prompt (left) and the Writing Space (right).
+3. **Timer**: Ensure the global timer is set to `60 * 60` (60 minutes).
+4. **Tabs**: Include Task 1 and Task 2 tabs that toggle using CSS `display: none / flex` to prevent text destruction on tab switch.
+5. **Images**: Images should be saved in `public/` (e.g., `public/17-4-writing-task1.png`) and referenced with `src="/17-4-writing-task1.png"`.
+6. **Word Count**: The writing space must feature a live word counter for both tasks.
+7. **Dashboard**: Ensure the `app/page.tsx` dashboard configuration is updated to make the new test route accessible.
